@@ -2,15 +2,12 @@
 
 **Temp Rooms** è un bot Discord che permette di creare canali vocali temporanei. Quando un utente si unisce a un canale "generatore" specifico, il bot crea automaticamente un nuovo canale vocale personalizzato per quell'utente. Il canale viene eliminato automaticamente quando rimane vuoto.
 
-Questa è la versione SaaS del bot, progettata per essere distribuita commercialmente come servizio multi-tenant.
-
 ## Funzionalità
 
 - **Creazione automatica**: Unisciti al canale generatore per creare istantaneamente un canale vocale personalizzato
 - **Eliminazione automatica**: I canali vengono eliminati automaticamente quando diventano vuoti
-- **Personalizzazione**: Ogni canale creato avrà un nome personalizzato con il nome dell'utente
+- **Personalizzazione**: Ogni canale creato avrà un nome personalizzato con il nome dell'utente o numerazione progressiva
 - **Sicurezza**: Solo gli utenti del server possono accedere ai canali temporanei
-- **Multi-Tenant**: Supporto per più server Discord con configurazioni indipendenti
 - **Sistema di Abbonamento**: Piani gratuiti e a pagamento con funzionalità avanzate
 - **Configurazione Dinamica**: Comandi slash per configurare il bot direttamente da Discord
 
@@ -18,7 +15,6 @@ Questa è la versione SaaS del bot, progettata per essere distribuita commercial
 
 - [Node.js](https://nodejs.org/) v16.6.0 o superiore
 - Un bot Discord registrato su [Discord Developer Portal](https://discord.com/developers/applications)
-- Accesso a un database SQLite (incluso)
 
 ## Installazione
 
@@ -43,6 +39,14 @@ Questa è la versione SaaS del bot, progettata per essere distribuita commercial
    DISCORD_TOKEN=il_tuo_token_del_bot
    CLIENT_ID=ID_della_tua_applicazione_Discord
    PORT=3000
+   
+   # Configurazione Canali
+   GENERATOR_CHANNEL_ID=
+   CATEGORY_ID=
+   CONTROL_CHANNEL_ID=
+   CHANNEL_NAME_TEMPLATE=🔊 Stanza #
+   DEFAULT_USER_LIMIT=0
+   MAX_CHANNELS=10
    ```
 
 5. Registra i comandi slash del bot:
@@ -94,18 +98,32 @@ Se il bot si avvia correttamente, vedrai il messaggio "TempRooms è online!" nel
 - `/config set` - Imposta una configurazione
 - `/config reset` - Ripristina le impostazioni di default
 - `/subscribe` - Informazioni sugli abbonamenti e come effettuare l'upgrade
+- `/limit` - Imposta il limite di utenti per il canale corrente
+
+## Personalizzazione dei Nomi dei Canali
+
+Il bot supporta due formati per il nome dei canali temporanei:
+
+1. **Nome utente**: Usa `{username}` per includere il nome dell'utente che crea il canale
+   - Esempio: `🔊 Stanza di {username}` → `🔊 Stanza di Marco`
+
+2. **Numerazione progressiva**: Usa `#` per creare una numerazione automatica
+   - Esempio: `🔊 Stanza #` → `🔊 Stanza #1`, `🔊 Stanza #2`, ecc.
+
+Puoi modificare il formato usando il comando:
+```
+/config set channel_name_template "Il tuo formato"
+```
 
 ## Struttura del Progetto
 
 ```
 /temp-rooms-open
-├── index.js                    # Codice principale del bot e server webhook
+├── index.js                    # Codice principale del bot
 ├── package.json               # Dipendenze e informazioni del progetto
 ├── .env.example               # File di esempio per le variabili d'ambiente
 ├── .gitignore                 # File da ignorare nel controllo versione
 ├── README.md                  # Questo file
-├── database/
-│   └── db.js                 # Gestione del database
 ├── commands/
 │   ├── deploy-commands.js    # Script per registrare i comandi slash
 │   └── handlers/             # Gestori per i comandi slash
@@ -122,8 +140,6 @@ Se il bot si avvia correttamente, vedrai il messaggio "TempRooms è online!" nel
 
 - [Node.js](https://nodejs.org/)
 - [discord.js](https://discord.js.org/) v14
-- [Express.js](https://expressjs.com/) per il server webhook
-- [SQLite](https://www.sqlite.org/) per il database
 - [Stripe](https://stripe.com/) per i pagamenti
 - [dotenv](https://github.com/motdotla/dotenv) per la gestione delle variabili d'ambiente
 
