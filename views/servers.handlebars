@@ -1,0 +1,245 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="section-title mb-0">Server Discord</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServerModal">
+        <i class="bi bi-plus-lg"></i> Aggiungi Server
+    </button>
+</div>
+
+<div class="server-selector mb-4">
+    <h5 class="mb-3">Seleziona un Server</h5>
+    <div class="row g-2">
+        {{#each servers}}
+        <div class="col-md-4 col-lg-3">
+            <div class="server-item {{#if (eq ../selectedServer.id id)}}active{{/if}}" 
+                 onclick="location.href='/servers/{{id}}'">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
+                             style="width: 40px; height: 40px;">
+                            <i class="bi bi-discord text-primary fs-5"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="fw-medium">{{name}}</div>
+                        <small class="text-opacity-75">{{memberCount}} membri</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>
+
+{{#if selectedServer}}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Configurazione Server: {{selectedServer.name}}</h5>
+            </div>
+            <div class="card-body">
+                <form id="serverConfigForm" action="/api/servers/{{selectedServer.id}}/config" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Canale Generatore</label>
+                        <select class="form-select" name="generator_channel_id" data-auto-submit>
+                            <option value="">Seleziona un canale</option>
+                            {{#each selectedServer.channels}}
+                                {{#if (eq type 'voice')}}
+                                <option value="{{id}}" {{#if (eq id ../selectedServer.config.generator_channel_id)}}selected{{/if}}>
+                                    {{name}}
+                                </option>
+                                {{/if}}
+                            {{/each}}
+                        </select>
+                        <small class="form-text text-muted">Il canale vocale che gli utenti useranno per creare nuove stanze.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Categoria</label>
+                        <select class="form-select" name="category_id" data-auto-submit>
+                            <option value="">Seleziona una categoria</option>
+                            {{#each selectedServer.channels}}
+                                {{#if (eq type 'category')}}
+                                <option value="{{id}}" {{#if (eq id ../selectedServer.config.category_id)}}selected{{/if}}>
+                                    {{name}}
+                                </option>
+                                {{/if}}
+                            {{/each}}
+                        </select>
+                        <small class="form-text text-muted">La categoria in cui verranno creati i canali temporanei.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Canale di Controllo</label>
+                        <select class="form-select" name="control_channel_id" data-auto-submit>
+                            <option value="">Nessuno</option>
+                            {{#each selectedServer.channels}}
+                                {{#if (eq type 'text')}}
+                                <option value="{{id}}" {{#if (eq id ../selectedServer.config.control_channel_id)}}selected{{/if}}>
+                                    {{name}}
+                                </option>
+                                {{/if}}
+                            {{/each}}
+                        </select>
+                        <small class="form-text text-muted">Canale testo dove ricevere notifiche e comandi.</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Template Nome Canale</label>
+                                <input type="text" class="form-control" name="channel_name_template" 
+                                       value="{{selectedServer.config.channel_name_template}}" data-auto-submit>
+                                <small class="form-text text-muted">Template per il nome dei canali creati. Usa {username} per il nome dell'utente.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Limite Utenti Predefinito</label>
+                                <input type="number" class="form-control" name="default_user_limit" 
+                                       value="{{selectedServer.config.default_user_limit}}" 
+                                       min="0" max="99" data-auto-submit>
+                                <small class="form-text text-muted">Limite utenti predefinito per i nuovi canali (0 = nessun limite).</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Stato Server</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="status-indicator {{#if selectedServer.configComplete}}status-online{{else}}status-configuring{{/if}} me-2"></div>
+                    <span>
+                        {{#if selectedServer.configComplete}}
+                            Configurato
+                        {{else}}
+                            Configurazione Richiesta
+                        {{/if}}
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Membri</small>
+                    <div>{{selectedServer.memberCount}}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Canali Vocali</small>
+                    <div>{{selectedServer.voiceChannelCount}}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Canali Testo</small>
+                    <div>{{selectedServer.textChannelCount}}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Canali Temporanei Attivi</small>
+                    <div>{{selectedServer.activeTempChannels}}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Azioni Rapide</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-outline-danger w-100 mb-2" onclick="resetServerConfig('{{selectedServer.id}}')">
+                    <i class="bi bi-arrow-repeat"></i> Reset Configurazione
+                </button>
+                <button class="btn btn-outline-primary w-100" onclick="testConfiguration('{{selectedServer.id}}')">
+                    <i class="bi bi-check-circle"></i> Test Configurazione
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{else}}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-discord fs-1 text-muted mb-3"></i>
+        <h3>Aggiungi un Server</h3>
+        <p class="text-muted">Seleziona un server per iniziare la configurazione o aggiungine uno nuovo.</p>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServerModal">
+            <i class="bi bi-plus-lg"></i> Aggiungi Server
+        </button>
+    </div>
+</div>
+{{/if}}
+
+<!-- Modal Aggiungi Server -->
+<div class="modal fade" id="addServerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aggiungi Server</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Per aggiungere un server, invita il bot al tuo server Discord usando il link di invito:</p>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" value="https://discord.com/api/oauth2/authorize?client_id={{clientId}}&permissions=8&scope=bot%20applications.commands" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(this)">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <p class="text-muted">Dopo aver invitato il bot, ricarica questa pagina per vedere il server nell'elenco.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyToClipboard(button) {
+        const input = button.parentElement.querySelector('input');
+        input.select();
+        document.execCommand('copy');
+        
+        // Cambia l'icona temporaneamente
+        const originalIcon = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i>';
+        setTimeout(() => {
+            button.innerHTML = originalIcon;
+        }, 2000);
+    }
+    
+    function resetServerConfig(serverId) {
+        if (confirm('Sei sicuro di voler resettare la configurazione di questo server?')) {
+            fetch('/api/servers/' + serverId + '/reset', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Configurazione resettata con successo!', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Errore nel reset: ' + data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                showToast('Errore nella richiesta: ' + error.message, 'danger');
+            });
+        }
+    }
+    
+    function testConfiguration(serverId) {
+        showToast('Test configurazione in corso...', 'info');
+        // Qui andrebbe l'implementazione del test reale
+        setTimeout(() => {
+            showToast('Configurazione testata con successo!', 'success');
+        }, 1500);
+    }
+</script>

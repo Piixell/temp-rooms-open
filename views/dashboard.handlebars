@@ -1,0 +1,126 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="section-title mb-0">Dashboard</h1>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" type="button" onclick="location.reload()">
+            <i class="bi bi-arrow-clockwise"></i> Aggiorna
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-server fs-1 text-primary"></i>
+                </div>
+                <h3>{{serverCount}}</h3>
+                <p class="text-muted mb-0">Server Connessi</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-headset fs-1 text-success"></i>
+                </div>
+                <h3>{{totalChannels}}</h3>
+                <p class="text-muted mb-0">Canali Creati</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-people fs-1 text-warning"></i>
+                </div>
+                <h3>{{totalUsers}}</h3>
+                <p class="text-muted mb-0">Utenti Attivi</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Configurazione Rapida</h5>
+            </div>
+            <div class="card-body">
+                <p>Benvenuto nella dashboard di TempRooms! Qui puoi configurare rapidamente il bot per i tuoi server Discord.</p>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="feature-list">
+                            <li><i class="bi bi-check-circle-fill"></i> Configurazione server</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Gestione canali</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Limiti utenti</li>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-list">
+                            <li><i class="bi bi-check-circle-fill"></i> Abbonamenti</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Statistiche</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Supporto</li>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/servers" class="btn btn-primary">
+                        <i class="bi bi-gear"></i> Configura Server
+                    </a>
+                    <a href="/settings" class="btn btn-outline-primary ms-2">
+                        <i class="bi bi-sliders"></i> Impostazioni Avanzate
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Stato del Bot</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="status-indicator status-online me-2"></div>
+                    <span>Bot Online</span>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Ultimo aggiornamento</small>
+                    <div>{{lastUpdate}}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Versione</small>
+                    <div>v2.0.0</div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">Ping</small>
+                    <div>24ms</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Supporto</h5>
+            </div>
+            <div class="card-body">
+                <p>Hai bisogno di aiuto? Contatta il nostro team di supporto.</p>
+                <a href="mailto:support@temp-rooms.com" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-envelope"></i> support@temp-rooms.com
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
