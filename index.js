@@ -46,7 +46,6 @@ function generateChannelName(template, member, guildId) {
 
 const { checkPremiumFeature } = require('./middleware/subscriptionMiddleware');
 const { handleConfigCommand } = require('./commands/handlers/configHandler');
-const { handleSubscribeCommand } = require('./commands/handlers/subscribeHandler');
 const { handleSetupCommand } = require('./commands/handlers/setupHandler');
 const { handleLimitCommand } = require('./commands/handlers/limitHandler');
 
@@ -73,9 +72,6 @@ client.on(Events.InteractionCreate, async interaction => {
     switch (interaction.commandName) {
       case 'config':
         await handleConfigCommand(interaction);
-        break;
-      case 'subscribe':
-        await handleSubscribeCommand(interaction);
         break;
       case 'setup':
         await handleSetupCommand(interaction);

@@ -9,14 +9,12 @@ TempRooms è un bot Discord avanzato per la creazione di canali vocali temporane
 ### 2.1 Componenti Principali
 
 1. **Bot Discord** - Core functionality per la creazione/eliminazione canali
-2. **Sistema di Abbonamento** - Gestione piani (free, basic, premium)
-3. **Configurazione in memoria** - Configurazione tramite variabili d'ambiente
+2. **Configurazione in memoria** - Configurazione tramite variabili d'ambiente
 
 ### 2.2 Tecnologie Utilizzate
 
 - **Node.js** v22+
 - **discord.js** v14
-- **Stripe** per pagamenti (sistema semplificato)
 
 ## 3. Struttura del Progetto
 
@@ -33,10 +31,9 @@ TempRooms è un bot Discord avanzato per la creazione di canali vocali temporane
 │   └── handlers/            # Gestori comandi slash
 │       ├── configHandler.js
 │       ├── setupHandler.js
-│       ├── subscribeHandler.js
 │       └── limitHandler.js
 ├── middleware/
-│   └── subscriptionMiddleware.js # Controllo abbonamenti
+│   └── subscriptionMiddleware.js # Funzioni di utilità per il controllo delle funzionalità
 ```
 
 ## 4. Funzionalità Principali
@@ -54,11 +51,6 @@ I canali vengono eliminati automaticamente quando diventano vuoti.
 Supporta due formati per i nomi dei canali:
 - `{username}` - Include il nome dell'utente
 - `#` - Numerazione progressiva
-
-### 4.4 Sistema di Abbonamento
-
-- **Piano Gratuito**: 5 canali simultanei
-- **Piano Premium**: Canali illimitati
 
 ## 5. Configurazione
 
@@ -91,7 +83,6 @@ MAX_CHANNELS=                    # Numero massimo di canali simultanei
 ### 6.1 Comandi Utente
 
 - `/setup` - Guida alla configurazione iniziale
-- `/subscribe` - Informazioni sugli abbonamenti
 - `/limit` - Imposta il limite di utenti per il canale corrente
 
 ### 6.2 Comandi Amministratore
@@ -102,7 +93,6 @@ MAX_CHANNELS=                    # Numero massimo di canali simultanei
 
 Il bot implementa controlli di sicurezza per:
 - Verifica permessi amministratore per configurazioni
-- Controllo limiti di canali per piano di abbonamento
 - Gestione errori robusta
 
 ## 8. Limitazioni della Versione Semplificata
@@ -112,11 +102,9 @@ Questa versione semplificata ha alcune limitazioni rispetto alla versione comple
 1. **Configurazione**: Gestita solo tramite variabili d'ambiente, non dashboard web
 2. **Persistenza**: Le configurazioni non vengono salvate tra i riavvii
 3. **Database**: Tutti i dati sono gestiti in memoria
-4. **Webhooks**: Sistema di pagamento semplificato
 
 ## 9. Estendibilità
 
 Il sistema è progettato per essere facilmente estendibile:
 - Aggiunta nuovi comandi slash
 - Implementazione sistemi di persistenza
-- Integrazione con altri servizi di pagamento

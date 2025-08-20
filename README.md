@@ -8,7 +8,6 @@
 - **Eliminazione automatica**: I canali vengono eliminati automaticamente quando diventano vuoti
 - **Personalizzazione**: Ogni canale creato avrà un nome personalizzato con il nome dell'utente o numerazione progressiva
 - **Sicurezza**: Solo gli utenti del server possono accedere ai canali temporanei
-- **Sistema di Abbonamento**: Piani gratuiti e a pagamento con funzionalità avanzate
 - **Configurazione Dinamica**: Comandi slash per configurare il bot direttamente da Discord
 
 ## Requisiti
@@ -97,7 +96,6 @@ Se il bot si avvia correttamente, vedrai il messaggio "TempRooms è online!" nel
 - `/config view` - Visualizza la configurazione attuale
 - `/config set` - Imposta una configurazione
 - `/config reset` - Ripristina le impostazioni di default
-- `/subscribe` - Informazioni sugli abbonamenti e come effettuare l'upgrade
 - `/limit` - Imposta il limite di utenti per il canale corrente
 
 ## Personalizzazione dei Nomi dei Canali
@@ -129,30 +127,16 @@ Puoi modificare il formato usando il comando:
 │   └── handlers/             # Gestori per i comandi slash
 │       ├── configHandler.js
 │       ├── setupHandler.js
-│       └── subscribeHandler.js
+│       └── limitHandler.js
 ├── middleware/
-│   └── subscriptionMiddleware.js  # Middleware per la gestione degli abbonamenti
+│   └── subscriptionMiddleware.js  # Funzioni di utilità per il controllo delle funzionalità
 ```
 
 ## Tecnologie Utilizzate
 
 - [Node.js](https://nodejs.org/)
 - [discord.js](https://discord.js.org/) v14
-- [Stripe](https://stripe.com/) per i pagamenti
 - [dotenv](https://github.com/motdotla/dotenv) per la gestione delle variabili d'ambiente
-
-## Piani di Abbonamento
-
-### Piano Gratuito
-- Creazione di canali vocali temporanei
-- Eliminazione automatica quando vuoti
-- Fino a 5 canali simultanei
-
-### Piano Premium (€1,49/mese)
-- Tutte le funzionalità del piano gratuito
-- Canali illimitati
-- Supporto prioritario
-- Nuove features in anteprima
 
 ## Contribuire
 
