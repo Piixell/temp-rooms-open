@@ -1,5 +1,5 @@
 {
-  "name": "temp-rooms",
+  "name": "temp-rooms-open",
   "version": "2.0.0",
   "description": "Bot Discord per la creazione di canali vocali temporanei - Versione SaaS",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Piixell/temp-rooms.git"
+    "url": "git+https://github.com/Piixell/temp-rooms-open.git"
   },
   "keywords": [
     "discord",
@@ -25,9 +25,9 @@
   "license": "MIT",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Piixell/temp-rooms/issues"
+    "url": "https://github.com/Piixell/temp-rooms-open/issues"
   },
-  "homepage": "https://github.com/Piixell/temp-rooms#readme",
+  "homepage": "https://github.com/Piixell/temp-rooms-open#readme",
   "dependencies": {
     "@discordjs/rest": "^2.5.1",
     "discord-api-types": "^0.38.20",
