@@ -1,75 +1,52 @@
-const { getSubscription } = require('../../database/db');
-
-module.exports = {
-  handleSubscribeCommand: async (interaction) => {
-    const guildId = interaction.guildId;
-    const subscription = await getSubscription(guildId);
-    
-    const plan = subscription ? subscription.plan_type : 'free';
-    const status = subscription ? subscription.status : 'active';
-    
-    let response = '';
-    
-    switch (plan) {
-      case 'free':
-        response = `
-📢 **Piano Gratuito**
-Hai il piano gratuito che include funzionalità di base.
-
-✨ **Funzionalità incluse:**
-- Creazione di canali vocali temporanei
-- Eliminazione automatica quando vuoti
-- Fino a 5 canali simultanei
-
-🚀 **Effettua l'upgrade per sbloccare:**
-- Canali illimitati
-- Personalizzazione avanzata
-- Supporto prioritario
-- E molto altro!
-
-👉 Clicca qui per effettuare l'upgrade: https://tuosito.com/upgrade
-        `.trim();
-        break;
-        
-      case 'basic':
-        response = `
-🌟 **Piano Basic**
-Sei nel piano Basic attivo!
-
-✨ **Funzionalità incluse:**
-- Creazione di canali vocali temporanei
-- Eliminazione automatica quando vuoti
-- Fino a 20 canali simultanei
-- Template nome canale personalizzabile
-        `.trim();
-        break;
-        
-      case 'premium':
-        response = `
-💎 **Piano Premium**
-Sei nel piano Premium attivo! Grazie per il tuo supporto!
-
-✨ **Funzionalità incluse:**
-- Creazione illimitata di canali vocali temporanei
-- Eliminazione automatica quando vuoti
-- Template nome canale personalizzabile
-- Supporto prioritario
-- Accesso anticipato a nuove funzionalità
-        `.trim();
-        break;
-        
-      default:
-        response = `
-❓ **Stato sconosciuto**
-Impossibile determinare il tuo piano di abbonamento.
-
-👉 Contatta il supporto o visita: https://tuosito.com/subscribe
-        `.trim();
-    }
-    
-    return await interaction.reply({
-      content: response,
-      ephemeral: true
-    });
-  }
+// Simulazione di sottoscrizione in memoria
+let serverSubscription = {
+  plan_type: 'free',
+  status: 'active'
 };
+
+// Funzione per ottenere la sottoscrizione (simulazione)
+function getSubscription(guildId) {
+  return serverSubscription;
+}
+
+async function handleSubscribeCommand(interaction) {
+  const subscription = getSubscription(interaction.guildId);
+  
+  const embed = {
+    color: 0xffd700,
+    title: '💎 Abbonamento TempRooms',
+    description: 'Sblocca funzionalità avanzate con il nostro piano Premium!',
+    fields: [
+      {
+        name: ' Piano Attuale',
+        value: subscription.plan_type === 'premium' ? '⭐ Premium' : '🆓 Gratuito',
+        inline: false
+      },
+      {
+        name: ' vantaggi del Piano Gratuito',
+        value: '• Creazione di canali vocali temporanei\n• Eliminazione automatica quando vuoti\n• Fino a 5 canali simultanei',
+        inline: false
+      },
+      {
+        name: ' vantaggi del Piano Premium (€1,49/mese)',
+        value: '• Tutte le funzionalità del piano gratuito\n• Canali illimitati\n• Supporto prioritario\n• Nuove features in anteprima',
+        inline: false
+      },
+      {
+        name: 'Come effettuare l\'upgrade',
+        value: 'Per effettuare l\'upgrade, contatta il proprietario del bot per ottenere un link di pagamento personalizzato.',
+        inline: false
+      }
+    ],
+    footer: {
+      text: 'Grazie per il tuo supporto!'
+    }
+  };
+  
+  return await interaction.reply({
+    embeds: [embed],
+    ephemeral: true
+  });
+}
+
+module.exports = { handleSubscribeCommand };

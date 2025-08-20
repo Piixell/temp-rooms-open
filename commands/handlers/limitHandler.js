@@ -1,59 +1,57 @@
-const { getTemporaryChannel, setChannelUserLimit } = require('../../database/db');
+// Simulazione di canali temporanei in memoria
+let temporaryChannels = {};
 
-module.exports = {
-  handleLimitCommand: async (interaction) => {
-    // Verifica che l'utente sia in un canale vocale
-    if (!interaction.member.voice.channel) {
-      return await interaction.reply({
-        content: '❌ Devi essere in un canale vocale per usare questo comando!',
-        ephemeral: true
-      });
-    }
+// Funzione per ottenere un canale temporaneo (simulazione)
+function getTemporaryChannel(channelId) {
+  return temporaryChannels[channelId] || null;
+}
 
-    const channelId = interaction.member.voice.channel.id;
-    const userLimit = interaction.options.getInteger('numero');
-    
-    // Verifica se il canale è un canale temporaneo
-    const tempChannel = await getTemporaryChannel(channelId);
-    
-    if (!tempChannel) {
-      return await interaction.reply({
-        content: '❌ Questo comando può essere usato solo nei canali vocali temporanei creati dal bot!',
-        ephemeral: true
-      });
-    }
-    
-    // Verifica che l'utente sia il proprietario del canale o un amministratore
-    if (tempChannel.owner_id !== interaction.user.id && !interaction.member.permissions.has('Administrator')) {
-      return await interaction.reply({
-        content: '❌ Solo il proprietario del canale o un amministratore può cambiare il limite utenti!',
-        ephemeral: true
-      });
-    }
-    
-    try {
-      // Aggiorna il limite utenti nel database
-      await setChannelUserLimit(channelId, userLimit);
-      
-      // Aggiorna il limite utenti nel canale Discord
-      await interaction.member.voice.channel.edit({
-        userLimit: userLimit
-      });
-      
-      const response = userLimit > 0 
-        ? `✅ Limite utenti impostato a ${userLimit} per il canale ${interaction.member.voice.channel.name}`
-        : `✅ Limite utenti rimosso per il canale ${interaction.member.voice.channel.name}`;
-      
-      return await interaction.reply({
-        content: response,
-        ephemeral: true
-      });
-    } catch (error) {
-      console.error('Errore nell\'impostazione del limite utenti:', error);
-      return await interaction.reply({
-        content: '❌ Si è verificato un errore durante l\'impostazione del limite utenti.',
-        ephemeral: true
-      });
-    }
+// Funzione per impostare il limite utenti di un canale (simulazione)
+function setChannelUserLimit(channelId, userLimit) {
+  if (temporaryChannels[channelId]) {
+    temporaryChannels[channelId].user_limit = userLimit;
   }
-};
+  // In un'implementazione reale, qui andrebbe salvato su file
+}
+
+async function handleLimitCommand(interaction) {
+  // Verifica che l'utente sia in un canale vocale
+  if (!interaction.member.voice.channel) {
+    return await interaction.reply({
+      content: '❌ Devi essere in un canale vocale per usare questo comando!',
+      ephemeral: true
+    });
+  }
+  
+  const channel = interaction.member.voice.channel;
+  const limit = interaction.options.getInteger('numero');
+  
+  // Verifica che il limite sia valido
+  if (limit < 0 || limit > 99) {
+    return await interaction.reply({
+      content: '❌ Il limite utenti deve essere compreso tra 0 e 99 (0 = nessun limite)!',
+      ephemeral: true
+    });
+  }
+  
+  try {
+    // Imposta il limite utenti sul canale
+    await channel.setUserLimit(limit);
+    
+    // Aggiorna il limite nella memoria (simulazione)
+    setChannelUserLimit(channel.id, limit);
+    
+    return await interaction.reply({
+      content: `✅ Limite utenti impostato a ${limit} per il canale ${channel.name}!`,
+      ephemeral: true
+    });
+  } catch (error) {
+    console.error('Error setting channel user limit:', error);
+    return await interaction.reply({
+      content: '❌ Si è verificato un errore durante l\'impostazione del limite utenti. Assicurati che il bot abbia i permessi necessari.',
+      ephemeral: true
+    });
+  }
+}
+
+module.exports = { handleLimitCommand };

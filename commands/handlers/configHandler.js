@@ -1,175 +1,179 @@
-const { getGuildSettings, setGuildSettings } = require('../../database/db');
+const { Client, Events, GatewayIntentBits } = require('discord.js');
 
-module.exports = {
-  handleConfigCommand: async (interaction) => {
-    // Verifica che l'utente abbia permessi di amministrazione
-    if (!interaction.member.permissions.has('Administrator')) {
-      return await interaction.reply({
-        content: '❌ Solo gli amministratori possono configurare il bot!',
-        ephemeral: true
-      });
-    }
-
-    const subcommand = interaction.options.getSubcommand();
-    const guildId = interaction.guildId;
-
-    switch (subcommand) {
-      case 'view':
-        return await handleViewConfig(interaction, guildId);
-      case 'set':
-        return await handleSetConfig(interaction, guildId);
-      case 'reset':
-        return await handleResetConfig(interaction, guildId);
-      default:
-        return await interaction.reply({
-          content: '❌ Comando non riconosciuto.',
-          ephemeral: true
-        });
-    }
-  }
+// Configurazione letta dalle variabili d'ambiente
+let serverSettings = {
+  generator_channel_id: process.env.GENERATOR_CHANNEL_ID || null,
+  category_id: process.env.CATEGORY_ID || null,
+  control_channel_id: process.env.CONTROL_CHANNEL_ID || null,
+  channel_name_template: process.env.CHANNEL_NAME_TEMPLATE || '🔊 Stanza di {username}',
+  default_user_limit: parseInt(process.env.DEFAULT_USER_LIMIT) || 0,
+  max_channels: parseInt(process.env.MAX_CHANNELS) || 10
 };
 
-async function handleViewConfig(interaction, guildId) {
-  const settings = await getGuildSettings(guildId);
-  
-  if (!settings) {
+// Funzione per ottenere le impostazioni (simulazione)
+function getGuildSettings() {
+  return serverSettings;
+}
+
+// Funzione per impostare le impostazioni (simulazione)
+function setGuildSettings(guildId, settings) {
+  serverSettings = { ...serverSettings, ...settings };
+  // In un'implementazione reale, qui andrebbe salvato su file .env
+  return serverSettings;
+}
+
+async function handleConfigCommand(interaction) {
+  // Verifica che l'utente abbia permessi di amministrazione
+  if (!interaction.member.permissions.has('Administrator')) {
     return await interaction.reply({
-      content: 'ℹ️ Il bot non è ancora configurato per questo server. Usa `/config set` per iniziare.',
+      content: '❌ Solo gli amministratori possono configurare il bot!',
       ephemeral: true
     });
   }
 
-  // Verifica se gli ID sembrano validi
-  const generatorValid = settings.generator_channel_id && /^\d+$/.test(settings.generator_channel_id);
-  const categoryValid = settings.category_id && /^\d+$/.test(settings.category_id);
-  const controlValid = settings.control_channel_id && /^\d+$/.test(settings.control_channel_id);
-
-  const response = `
-**🔧 Configurazione Attuale**
-
-**Canale Generatore:** ${generatorValid ? `<#${settings.generator_channel_id}>` : `ID: ${settings.generator_channel_id || 'Non impostato'}`}
-**Categoria:** ${categoryValid ? `<#${settings.category_id}>` : `ID: ${settings.category_id || 'Non impostato'}`}
-**Canale di Controllo:** ${controlValid ? `<#${settings.control_channel_id}>` : `ID: ${settings.control_channel_id || 'Non impostato'}`}
-**Template Nome Canale:** \`${settings.channel_name_template}\`
-**Numero Massimo di Canali:** ${settings.max_channels}
-**Limite Utenti Predefinito:** ${settings.default_user_limit > 0 ? settings.default_user_limit : 'Nessun limite'}
-
-❗ *Nota: Assicurati di usare gli ID numerici dei canali, non i nomi. Abilita la "Modalità sviluppatore" in Discord per copiare gli ID.*
-  `.trim();
-
-  return await interaction.reply({
-    content: response,
-    ephemeral: true
-  });
-}
-
-async function handleSetConfig(interaction, guildId) {
-  const setting = interaction.options.getString('setting');
-  let value = interaction.options.getString('value');
+  const subcommand = interaction.options.getSubcommand();
   
-  // Se il valore è un menzionamento di canale, estrai l'ID
-  if (value.startsWith('<#') && value.endsWith('>')) {
-    value = value.slice(2, -1);
-  }
-  
-  // Validazione dell'ID (deve essere un numero) per canali e categorie
-  if (setting === 'generator_channel' || setting === 'category' || setting === 'control_channel') {
-    if (value !== 'none' && !/^\d+$/.test(value)) {
+  switch (subcommand) {
+    case 'view':
+      const config = getGuildSettings();
+      
+      const viewEmbed = {
+        color: 0x0099ff,
+        title: '🔧 Configurazione Attuale',
+        fields: [
+          {
+            name: 'Canale Generatore',
+            value: config.generator_channel_id ? `<#${config.generator_channel_id}>` : '❌ Non impostato',
+            inline: true
+          },
+          {
+            name: 'Categoria',
+            value: config.category_id ? `<#${config.category_id}>` : '❌ Non impostata',
+            inline: true
+          },
+          {
+            name: 'Canale di Controllo',
+            value: config.control_channel_id ? `<#${config.control_channel_id}>` : '❌ Non impostato',
+            inline: true
+          },
+          {
+            name: 'Template Nome Canale',
+            value: `\`${config.channel_name_template}\``,
+            inline: false
+          },
+          {
+            name: 'Limite Utenti Predefinito',
+            value: config.default_user_limit > 0 ? `${config.default_user_limit}` : ' Nessun limite',
+            inline: true
+          },
+          {
+            name: 'Max Canali Simultanei',
+            value: `${config.max_channels}`,
+            inline: true
+          }
+        ],
+        footer: {
+          text: 'Usa /config set per modificare queste impostazioni'
+        }
+      };
+      
       return await interaction.reply({
-        content: `❌ L'ID del ${setting === 'generator_channel' ? 'canale generatore' : setting === 'category' ? 'categoria' : 'canale di controllo'} deve essere un numero valido o "none" per rimuoverlo.\n\n💡 *Abilita la "Modalità sviluppatore" in Discord, fai clic destro sul canale e seleziona "Copia ID".*`,
+        embeds: [viewEmbed],
         ephemeral: true
       });
-    }
-  }
-  
-  // Validazione per il limite utenti
-  if (setting === 'default_user_limit') {
-    const numValue = parseInt(value);
-    if (isNaN(numValue) || numValue < 0 || numValue > 99) {
-      return await interaction.reply({
-        content: '❌ Il limite utenti deve essere un numero tra 0 e 99 (0 = nessun limite).',
-        ephemeral: true
-      });
-    }
-  }
-  
-  // Ottieni le impostazioni attuali o crea un oggetto vuoto
-  let settings = await getGuildSettings(guildId);
-  if (!settings) {
-    settings = {
-      generator_channel_id: null,
-      category_id: null,
-      channel_name_template: '🔊 Stanza di {username}',
-      max_channels: 10,
-      control_channel_id: null,
-      default_user_limit: 0
-    };
-  }
-
-  // Aggiorna l'impostazione specificata
-  switch (setting) {
-    case 'generator_channel':
-      settings.generator_channel_id = value === 'none' ? null : value;
-      break;
-    case 'category':
-      settings.category_id = value === 'none' ? null : value;
-      break;
-    case 'control_channel':
-      settings.control_channel_id = value === 'none' ? null : value;
-      break;
-    case 'channel_name_template':
-      settings.channel_name_template = value;
-      break;
-    case 'max_channels':
-      const numValue = parseInt(value);
-      if (isNaN(numValue) || numValue < 1 || numValue > 50) {
+      
+    case 'set':
+      const generatorChannel = interaction.options.getChannel('generator_channel');
+      const category = interaction.options.getChannel('category');
+      const controlChannel = interaction.options.getChannel('control_channel');
+      const channelNameTemplate = interaction.options.getString('channel_name_template');
+      const defaultUserLimit = interaction.options.getInteger('default_user_limit');
+      const maxChannels = interaction.options.getInteger('max_channels');
+      
+      // Verifica che i canali siano del tipo corretto
+      if (generatorChannel && generatorChannel.type !== 2) { // Voice channel
         return await interaction.reply({
-          content: '❌ Il numero massimo di canali deve essere un numero tra 1 e 50.',
+          content: '❌ Il canale generatore deve essere un canale vocale!',
           ephemeral: true
         });
       }
-      settings.max_channels = numValue;
-      break;
-    case 'default_user_limit':
-      const userLimit = parseInt(value);
-      settings.default_user_limit = userLimit;
-      break;
+      
+      if (category && category.type !== 4) { // Category
+        return await interaction.reply({
+          content: '❌ La categoria deve essere una categoria!',
+          ephemeral: true
+        });
+      }
+      
+      if (controlChannel && controlChannel.type !== 0) { // Text channel
+        return await interaction.reply({
+          content: '❌ Il canale di controllo deve essere un canale testuale!',
+          ephemeral: true
+        });
+      }
+      
+      // Aggiorna la configurazione
+      const newSettings = {};
+      
+      if (generatorChannel) newSettings.generator_channel_id = generatorChannel.id;
+      if (category) newSettings.category_id = category.id;
+      if (controlChannel) newSettings.control_channel_id = controlChannel.id;
+      if (channelNameTemplate) newSettings.channel_name_template = channelNameTemplate;
+      if (defaultUserLimit !== null) newSettings.default_user_limit = defaultUserLimit;
+      if (maxChannels !== null) newSettings.max_channels = maxChannels;
+      
+      setGuildSettings(interaction.guildId, newSettings);
+      
+      const setEmbed = {
+        color: 0x00ff00,
+        title: '✅ Configurazione Aggiornata',
+        description: 'Le impostazioni sono state aggiornate con successo!',
+        fields: [
+          {
+            name: 'Canale Generatore',
+            value: generatorChannel ? `<#${generatorChannel.id}>` : 'Non modificato',
+            inline: true
+          },
+          {
+            name: 'Categoria',
+            value: category ? `<#${category.id}>` : 'Non modificata',
+            inline: true
+          },
+          {
+            name: 'Template Nome Canale',
+            value: channelNameTemplate ? `\`${channelNameTemplate}\`` : 'Non modificato',
+            inline: false
+          }
+        ]
+      };
+      
+      return await interaction.reply({
+        embeds: [setEmbed],
+        ephemeral: true
+      });
+      
+    case 'reset':
+      // Resetta la configurazione in memoria
+      serverSettings = {
+        generator_channel_id: null,
+        category_id: null,
+        control_channel_id: null,
+        channel_name_template: '🔊 Stanza di {username}',
+        default_user_limit: 0,
+        max_channels: 10
+      };
+      
+      return await interaction.reply({
+        content: '✅ Configurazione resettata alle impostazioni predefinite!',
+        ephemeral: true
+      });
+      
+    default:
+      return await interaction.reply({
+        content: '❌ Sottocomando non riconosciuto.',
+        ephemeral: true
+      });
   }
-
-  // Salva le impostazioni
-  await setGuildSettings(guildId, settings);
-
-  // Mostra una conferma con il nome del canale se possibile
-  let displayValue = value;
-  if ((setting === 'generator_channel' || setting === 'category' || setting === 'control_channel') && /^\d+$/.test(value)) {
-    displayValue = `<#${value}> (ID: ${value})`;
-  } else if (setting === 'default_user_limit') {
-    displayValue = value > 0 ? `${value} utenti` : 'Nessun limite';
-  } else if (value === 'none') {
-    displayValue = 'Rimosso';
-  }
-
-  return await interaction.reply({
-    content: `✅ Impostazione \`${setting}\` aggiornata con successo a: ${displayValue}`,
-    ephemeral: true
-  });
 }
 
-async function handleResetConfig(interaction, guildId) {
-  // Impostazioni di default
-  const defaultSettings = {
-    generator_channel_id: null,
-    category_id: null,
-    channel_name_template: '🔊 Stanza di {username}',
-    max_channels: 10,
-    control_channel_id: null,
-    default_user_limit: 0
-  };
-
-  await setGuildSettings(guildId, defaultSettings);
-
-  return await interaction.reply({
-    content: '✅ Configurazione ripristinata ai valori di default.',
-    ephemeral: true
-  });
-}
+module.exports = { handleConfigCommand };

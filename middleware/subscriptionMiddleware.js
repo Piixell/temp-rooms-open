@@ -1,4 +1,28 @@
-const { getSubscription, getGuildSettings } = require('../database/db');
+// Simulazione di configurazione in memoria
+let serverSettings = {
+  generator_channel_id: process.env.GENERATOR_CHANNEL_ID || null,
+  category_id: process.env.CATEGORY_ID || null,
+  control_channel_id: process.env.CONTROL_CHANNEL_ID || null,
+  channel_name_template: process.env.CHANNEL_NAME_TEMPLATE || '🔊 Stanza di {username}',
+  default_user_limit: parseInt(process.env.DEFAULT_USER_LIMIT) || 0,
+  max_channels: parseInt(process.env.MAX_CHANNELS) || 10
+};
+
+// Simulazione di sottoscrizione in memoria
+let serverSubscription = {
+  plan_type: 'free',
+  status: 'active'
+};
+
+// Funzione per ottenere la sottoscrizione (simulazione)
+function getSubscription(guildId) {
+  return serverSubscription;
+}
+
+// Funzione per ottenere le impostazioni (simulazione)
+function getGuildSettings() {
+  return serverSettings;
+}
 
 // Middleware per verificare la sottoscrizione attiva
 async function checkSubscription(req, res, next) {
@@ -14,7 +38,7 @@ async function checkSubscription(req, res, next) {
 
 // Funzione per verificare la sottoscrizione di un server Discord
 async function checkGuildSubscription(guildId, req, res, next) {
-  const subscription = await getSubscription(guildId);
+  const subscription = getSubscription(guildId);
   
   // Se non esiste una sottoscrizione, creiamo una di default (free)
   if (!subscription) {
@@ -38,8 +62,8 @@ async function checkGuildSubscription(guildId, req, res, next) {
 
 // Funzione per verificare i limiti del piano
 async function checkPlanLimits(guildId, action) {
-  const subscription = await getSubscription(guildId);
-  const settings = await getGuildSettings(guildId);
+  const subscription = getSubscription(guildId);
+  const settings = getGuildSettings();
   
   const plan = subscription ? subscription.plan_type : 'free';
   const maxChannels = settings ? settings.max_channels : (plan === 'free' ? 5 : plan === 'basic' ? 20 : 100);
@@ -62,8 +86,8 @@ async function checkPlanLimits(guildId, action) {
 }
 
 // Controllo specifico per le funzionalità premium
-async function checkPremiumFeature(guildId, feature) {
-  const subscription = await getSubscription(guildId);
+function checkPremiumFeature(guildId, feature) {
+  const subscription = getSubscription(guildId);
   const plan = subscription ? subscription.plan_type : 'free';
   
   // Definiamo quali funzionalità sono premium

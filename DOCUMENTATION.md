@@ -2,41 +2,32 @@
 
 ## 1. Introduzione
 
-TempRooms è un bot Discord avanzato per la creazione di canali vocali temporanei, progettato come servizio SaaS (Software as a Service) completamente configurabile tramite dashboard web. Il bot permette agli utenti di creare canali vocali personalizzati unendosi a un canale "generatore", con eliminazione automatica quando il canale diventa vuoto.
+TempRooms è un bot Discord avanzato per la creazione di canali vocali temporanei, progettato come servizio SaaS (Software as a Service) completamente configurabile tramite comandi slash. Il bot permette agli utenti di creare canali vocali personalizzati unendosi a un canale "generatore", con eliminazione automatica quando il canale diventa vuoto.
 
 ## 2. Architettura del Sistema
 
 ### 2.1 Componenti Principali
 
 1. **Bot Discord** - Core functionality per la creazione/eliminazione canali
-2. **Dashboard Web** - Interfaccia di configurazione (Express.js + Handlebars)
-3. **Database SQLite** - Archiviazione configurazioni e dati utenti
-4. **Sistema di Abbonamento** - Gestione piani (free, basic, premium)
-5. **Webhooks** - Integrazione pagamenti (Stripe)
-6. **Middleware** - Controllo accessi e limiti
+2. **Sistema di Abbonamento** - Gestione piani (free, basic, premium)
+3. **Configurazione in memoria** - Configurazione tramite variabili d'ambiente
 
 ### 2.2 Tecnologie Utilizzate
 
 - **Node.js** v22+
 - **discord.js** v14
-- **Express.js** per il server web
-- **SQLite** per database
-- **Handlebars** per templating
-- **Bootstrap 5** per UI
-- **Stripe** per pagamenti
+- **Stripe** per pagamenti (sistema semplificato)
 
 ## 3. Struttura del Progetto
 
 ```
 /temp-rooms
-├── index.js                    # Entry point principale (bot + server web)
+├── index.js                    # Entry point principale (bot)
 ├── package.json               # Dipendenze e script
 ├── .env                       # Configurazione ambiente
 ├── .env.example              # Template configurazione
 ├── README.md                 # Documentazione utente
 ├── LICENSE                   # Licenza MIT
-├── database/
-│   └── db.js                # Gestione database SQLite
 ├── commands/
 │   ├── register-commands.js # Registrazione comandi slash
 │   └── handlers/            # Gestori comandi slash
@@ -46,206 +37,86 @@ TempRooms è un bot Discord avanzato per la creazione di canali vocali temporane
 │       └── limitHandler.js
 ├── middleware/
 │   └── subscriptionMiddleware.js # Controllo abbonamenti
-├── webhooks/
-│   └── stripe.js            # Gestione webhook pagamenti
-├── views/
-│   ├── dashboard.handlebars # Pagina dashboard principale
-│   ├── servers.handlebars   # Gestione server
-│   └── layouts/
-│       └── main.handlebars # Layout base
-└── public/
-    └── styles.css          # CSS personalizzati
 ```
 
 ## 4. Funzionalità Principali
 
 ### 4.1 Creazione Canali Temporanei
 
-- **Attivazione**: Unione al canale "generatore" configurato
-- **Personalizzazione**: Nome canale con template configurabile
-- **Posizionamento**: Canali creati nella categoria specificata
-- **Limiti Utenti**: Impostazione automatica del limite utenti
-- **Eliminazione**: Rimozione automatica quando il canale è vuoto
+Il bot monitora gli stati vocali degli utenti e crea canali temporanei quando un utente si unisce al canale "generatore".
 
-### 4.2 Configurazione tramite Dashboard Web
+### 4.2 Eliminazione Automatica
 
-#### 4.2.1 Parametri Configurabili
-- **Canale Generatore**: Canale vocale che attiva la creazione
-- **Categoria**: Categoria in cui creare i canali temporanei
-- **Canale di Controllo**: Canale testo per notifiche
-- **Template Nome**: Formato personalizzato per i nomi canali
-- **Limite Utenti Predefinito**: Limite massimo utenti per nuovo canale
+I canali vengono eliminati automaticamente quando diventano vuoti.
 
-#### 4.2.2 Funzionalità Dashboard
-- Gestione multi-server
-- Configurazione in tempo reale
-- Visualizzazione stato server
-- Test configurazione
-- Reset impostazioni
+### 4.3 Personalizzazione Nomi
 
-### 4.3 Comandi Discord Slash
-
-```
-/setup     - Guida configurazione iniziale
-/config    - Configurazione parametri server
-/subscribe - Informazioni abbonamento
-/limit     - Imposta limite utenti canale corrente
-```
+Supporta due formati per i nomi dei canali:
+- `{username}` - Include il nome dell'utente
+- `#` - Numerazione progressiva
 
 ### 4.4 Sistema di Abbonamento
 
-#### 4.4.1 Piani Disponibili
-- **Free**: 5 canali simultanei, funzionalità base
-- **Basic**: 20 canali simultanei, template personalizzabili
-- **Premium**: Canali illimitati, supporto prioritario
+- **Piano Gratuito**: 5 canali simultanei
+- **Piano Premium**: Canali illimitati
 
-#### 4.4.2 Funzionalità Premium
-- Canali vocali illimitati
-- Template nome canale avanzati
-- Supporto tecnico prioritario
-- Accesso anticipato a nuove funzionalità
+## 5. Configurazione
 
-## 5. Configurazione Ambiente
+### 5.1 Variabili d'Ambiente
 
-### 5.1 File .env
+Le configurazioni sono gestite tramite il file `.env`:
 
-```env
-DISCORD_TOKEN=token_bot_discord
-CLIENT_ID=id_applicazione_discord
-DATABASE_URL=sqlite:database/database.sqlite
-STRIPE_WEBHOOK_SECRET=secret_webhook_stripe
-PORT=3000
+```
+DISCORD_TOKEN=                    # Token del bot Discord
+CLIENT_ID=                       # ID dell'applicazione Discord
+PORT=3000                        # Porta del server (non utilizzata in questa versione)
+
+# Configurazione Canali
+GENERATOR_CHANNEL_ID=            # ID del canale generatore
+CATEGORY_ID=                     # ID della categoria per i canali temporanei
+CONTROL_CHANNEL_ID=              # ID del canale di controllo (opzionale)
+CHANNEL_NAME_TEMPLATE=           # Template per i nomi dei canali
+DEFAULT_USER_LIMIT=              # Limite utenti predefinito
+MAX_CHANNELS=                    # Numero massimo di canali simultanei
 ```
 
-### 5.2 Variabili Database
+### 5.2 Comandi di Configurazione
 
-#### Tabella `guild_settings`
-```sql
-guild_id              -- ID server Discord (PK)
-generator_channel_id  -- ID canale generatore
-category_id           -- ID categoria canali
-channel_name_template -- Template nome canale
-max_channels          -- Limite canali simultanei
-control_channel_id    -- ID canale controllo
-default_user_limit    -- Limite utenti predefinito
-```
+- `/config view` - Visualizza la configurazione attuale
+- `/config set` - Imposta le configurazioni
+- `/config reset` - Resetta la configurazione
 
-#### Tabella `subscriptions`
-```sql
-subscription_id       -- ID sottoscrizione (PK)
-guild_id             -- ID server (FK)
-plan_type            -- Tipo piano (free/basic/premium)
-status               -- Stato (active/expired)
-expiry_date          -- Data scadenza
-```
+## 6. Comandi Disponibili
 
-#### Tabella `temporary_channels`
-```sql
-channel_id           -- ID canale (PK)
-guild_id             -- ID server
-owner_id             -- ID proprietario
-user_limit           -- Limite utenti
-```
+### 6.1 Comandi Utente
 
-## 6. Avvio e Gestione
+- `/setup` - Guida alla configurazione iniziale
+- `/subscribe` - Informazioni sugli abbonamenti
+- `/limit` - Imposta il limite di utenti per il canale corrente
 
-### 6.1 Comandi NPM
+### 6.2 Comandi Amministratore
 
-```bash
-npm start              # Avvia il bot
-npm run deploy-commands # Registra comandi slash
-npm run dev            # Avvia in modalità sviluppo (con nodemon)
-```
+- `/config` - Comandi di configurazione completa
 
-### 6.2 Porte Utilizzate
+## 7. Sicurezza
 
-- **Porta 3000**: Dashboard web e API
-- **Porta Discord**: Connessione API Discord (gestita automaticamente)
+Il bot implementa controlli di sicurezza per:
+- Verifica permessi amministratore per configurazioni
+- Controllo limiti di canali per piano di abbonamento
+- Gestione errori robusta
 
-### 6.3 Requisiti di Sistema
+## 8. Limitazioni della Versione Semplificata
 
-- Node.js v16.6.0 o superiore
-- Accesso a Discord Developer Portal
-- Account Stripe per pagamenti (opzionale)
+Questa versione semplificata ha alcune limitazioni rispetto alla versione completa:
 
-## 7. Personalizzazione e Estensione
+1. **Configurazione**: Gestita solo tramite variabili d'ambiente, non dashboard web
+2. **Persistenza**: Le configurazioni non vengono salvate tra i riavvii
+3. **Database**: Tutti i dati sono gestiti in memoria
+4. **Webhooks**: Sistema di pagamento semplificato
 
-### 7.1 Aggiunta Nuove Funzionalità
+## 9. Estendibilità
 
-1. **Nuovi Comandi**: Creare handler in `commands/handlers/`
-2. **Nuove Rotte**: Aggiungere endpoint in `index.js`
-3. **Nuovi Template**: Modificare i file `.handlebars` in `views/`
-4. **Nuove Tabelle**: Aggiornare lo schema in `database/db.js`
-
-### 7.2 Personalizzazione UI
-
-- **CSS**: Modificare `public/styles.css`
-- **Layout**: Modificare `views/layouts/main.handlebars`
-- **Pagine**: Modificare i file `.handlebars` in `views/`
-
-### 7.3 Integrazione Pagamenti
-
-Il sistema è preconfigurato per Stripe:
-1. Configurare `STRIPE_WEBHOOK_SECRET` in `.env`
-2. Implementare logica business in `webhooks/stripe.js`
-3. Aggiornare i piani in `commands/handlers/subscribeHandler.js`
-
-## 8. Troubleshooting
-
-### 8.1 Problemi Comuni
-
-**Porta già in uso**: 
-```bash
-# Windows
-netstat -ano | findstr :3000
-taskkill /PID <pid> /F
-```
-
-**Errori configurazione canali**:
-- Verificare che gli ID siano numerici (non nomi)
-- Controllare i permessi del bot nel server
-
-**Comandi non funzionanti**:
-- Eseguire `npm run deploy-commands`
-- Verificare `CLIENT_ID` in `.env`
-
-### 8.2 Log e Debug
-
-- **Console**: Output standard per debugging
-- **File log**: Implementare con `winston` o similare
-- **Monitoraggio**: Aggiungere logging dettagliato nei punti critici
-
-## 9. Sicurezza
-
-### 9.1 Best Practice Implementate
-
-- Separazione configurazione (.env)
-- Validazione input utente
-- Controllo permessi amministratore
-- Sanitizzazione dati database
-- Crittografia dati sensibili (implementabile)
-
-### 9.2 Aree di Miglioramento
-
-- Implementazione autenticazione dashboard
-- Aggiunta rate limiting API
-- Crittografia dati sensibili
-- Backup database automatico
-- Monitoraggio errori produzione
-
-## 10. Scalabilità e Performance
-
-### 10.1 Considerazioni
-
-- SQLite sufficiente per installazioni small-medium
-- Per scalabilità: considerare PostgreSQL/MySQL
-- Cache configurazioni in memoria
-- Ottimizzazione query database
-- Load balancing per istanze multiple
-
-### 10.2 Monitoraggio
-
-- Tempo di risposta API
-- Utilizzo risorse server
-- Numero utenti/connessi
-- Errori sistema
+Il sistema è progettato per essere facilmente estendibile:
+- Aggiunta nuovi comandi slash
+- Implementazione sistemi di persistenza
+- Integrazione con altri servizi di pagamento

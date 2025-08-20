@@ -132,8 +132,6 @@ Puoi modificare il formato usando il comando:
 │       └── subscribeHandler.js
 ├── middleware/
 │   └── subscriptionMiddleware.js  # Middleware per la gestione degli abbonamenti
-└── webhooks/
-    └── stripe.js             # Gestione dei webhook di Stripe
 ```
 
 ## Tecnologie Utilizzate
