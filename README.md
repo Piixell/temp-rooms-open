@@ -128,8 +128,6 @@ Puoi modificare il formato usando il comando:
 │       ├── configHandler.js
 │       ├── setupHandler.js
 │       └── limitHandler.js
-├── middleware/
-│   └── subscriptionMiddleware.js  # Funzioni di utilità per il controllo delle funzionalità
 ```
 
 ## Tecnologie Utilizzate
