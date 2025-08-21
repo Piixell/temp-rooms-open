@@ -44,7 +44,6 @@ function generateChannelName(template, member, guildId) {
   return template.replace('{username}', member.user.username);
 }
 
-const { checkPremiumFeature } = require('./middleware/subscriptionMiddleware');
 const { handleConfigCommand } = require('./commands/handlers/configHandler');
 const { handleSetupCommand } = require('./commands/handlers/setupHandler');
 const { handleLimitCommand } = require('./commands/handlers/limitHandler');
