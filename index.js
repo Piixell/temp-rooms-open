@@ -32,7 +32,7 @@ function getNextChannelNumber(guildId) {
 // Funzione per generare il nome del canale
 function generateChannelName(template, member, guildId) {
   if (template.includes('{username}')) {
-    return template.replace('{username}', member.user.username);
+    return template.replace('{username}', member.user.nickname);
   }
   
   if (template.includes('#')) {
@@ -41,7 +41,7 @@ function generateChannelName(template, member, guildId) {
   }
   
   // Fallback
-  return template.replace('{username}', member.user.username);
+  return template.replace('{username}', member.user.nickname);
 }
 
 const { handleConfigCommand } = require('./commands/handlers/configHandler');
@@ -126,13 +126,7 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
       }
       return;
     }
-    
-    // Verifica i limiti del piano
-    const planCheck = await checkPremiumFeature(guildId, 'unlimited_channels');
-    if (!planCheck.allowed) {
-      // Controlla quanti canali temporanei esistono già
-      // (Lasciamo questa parte come era)
-    }
+
     
     // Create a new temporary channel
     try {
